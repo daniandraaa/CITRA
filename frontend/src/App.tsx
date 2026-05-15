@@ -48,7 +48,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-gray-100 text-slate-800 font-sans selection:bg-cyan-500/30">
       <Header originalImage={originalImage} onReset={resetImage} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

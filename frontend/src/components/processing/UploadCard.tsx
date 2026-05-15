@@ -9,20 +9,21 @@ const UploadCard = ({ onFileUpload }: UploadCardProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 shadow-xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-full blur-2xl"></div>
-      <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-        <Upload className="w-5 h-5 text-indigo-400" /> Data Source
-      </h2>
+    <div className="bg-white rounded-none border border-gray-300 p-6 shadow-sm relative">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+          <Upload className="w-5 h-5 text-cyan-600" /> 01. Input Source
+        </h2>
+        <span className="text-xs text-slate-400 font-mono">STATUS: READY</span>
+      </div>
+      
       <div 
-        className="border-2 border-dashed border-slate-600 hover:border-indigo-500 bg-slate-800/30 rounded-xl p-8 text-center cursor-pointer transition-colors group"
+        className="border border-dashed border-gray-300 hover:border-cyan-500 bg-gray-50 rounded-none p-8 text-center cursor-pointer transition-all group"
         onClick={() => fileInputRef.current?.click()}
       >
-        <div className="bg-slate-700/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
-          <Upload className="w-6 h-6 text-slate-400 group-hover:text-indigo-400" />
-        </div>
-        <p className="text-sm font-medium text-slate-300">Click to upload CT Scan</p>
-        <p className="text-xs text-slate-500 mt-1">Supports JPG, PNG formats</p>
+        <Upload className="w-10 h-10 text-gray-400 group-hover:text-cyan-600 mx-auto mb-3 transition-colors" />
+        <p className="text-sm font-bold text-slate-600 uppercase tracking-tight">Select CT DICOM/Image</p>
+        <p className="text-xs text-slate-400 mt-1 uppercase">RAW DATA INTAKE</p>
         <input 
           type="file" 
           ref={fileInputRef} 
