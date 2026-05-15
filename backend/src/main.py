@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src import manual_processing as mp
 import cv2
 import numpy as np
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -54,19 +58,7 @@ async def windowing(image_id: str = Form(...), preset: str = Form(...)):
         raise HTTPException(status_code=404, detail="Image not found")
         
     img = IMAGE_STORE[image_id]
-    
-    # Simple simulation of windowing via histogram stretching/clipping on 8-bit image
-    # Note: Real CT uses 16-bit Hounsfield Units, this is a simplified version for 8-bit.
-    result = img.copy()
-    if preset == 'lung':
-        # Darker contrast
-        result = cv2.convertScaleAbs(result, alpha=1.5, beta=-100)
-    elif preset == 'bone':
-        # High contrast
-        result = cv2.convertScaleAbs(result, alpha=2.0, beta=-50)
-    elif preset == 'soft_tissue':
-        # Moderate contrast
-        result = cv2.convertScaleAbs(result, alpha=1.2, beta=10)
+    result = mp.apply_windowing(img, preset)
     
     return {"image": encode_image(result)}
 
@@ -78,9 +70,9 @@ async def noise_removal(image_id: str = Form(...), method: str = Form(...)):
     img = IMAGE_STORE[image_id]
     
     if method == 'gaussian':
-        result = cv2.GaussianBlur(img, (5, 5), 0)
+        result = mp.apply_gaussian_blur(img, 5, 1.0)
     elif method == 'median':
-        result = cv2.medianBlur(img, 5)
+        result = mp.apply_median_filter(img, 5)
     else:
         result = img
         
@@ -94,12 +86,9 @@ async def edge_detection(image_id: str = Form(...), method: str = Form(...)):
     img = IMAGE_STORE[image_id]
     
     if method == 'sobel':
-        sobelx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
-        sobely = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
-        magnitude = cv2.magnitude(sobelx, sobely)
-        result = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+        result = mp.apply_sobel(img)
     elif method == 'canny':
-        result = cv2.Canny(img, 100, 200)
+        result = mp.apply_canny(img, 50, 150)
     else:
         result = img
         
@@ -112,24 +101,7 @@ async def segmentation(image_id: str = Form(...), min_thresh: int = Form(...), m
         
     img = IMAGE_STORE[image_id]
     
-    # Thresholding between min and max
-    _, thresh_min = cv2.threshold(img, min_thresh, 255, cv2.THRESH_TOZERO)
-    _, result = cv2.threshold(thresh_min, max_thresh, 255, cv2.THRESH_TOZERO_INV)
-    
-    # Convert back to binary mask for clear visualization of ROI
-    _, mask = cv2.threshold(result, 1, 255, cv2.THRESH_BINARY)
-    
-    # Apply colormap to highlight ROI
-    color_mask = cv2.applyColorMap(mask, cv2.COLORMAP_JET)
-    
-    # Blend with original
-    img_color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    blended = cv2.addWeighted(img_color, 0.7, color_mask, 0.3, 0)
-    
-    # Calculate area
-    area_pixels = cv2.countNonZero(mask)
-    total_pixels = img.shape[0] * img.shape[1]
-    area_percent = (area_pixels / total_pixels) * 100
+    blended, area_pixels, area_percent = mp.apply_segmentation(img, min_thresh, max_thresh)
     
     return {
         "image": encode_image(blended),
