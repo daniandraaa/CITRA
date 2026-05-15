@@ -17,11 +17,11 @@ pip install uv
 
 To run the backend server:
 ```powershell
-uv run python main.py
+uv run python src/main.py
 ```
 Or:
 ```powershell
-uv run uvicorn main:app --reload
+uv run uvicorn src.main:app --reload
 ```
 
 The server will be available at `http://localhost:8000`.

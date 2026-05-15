@@ -28,9 +28,9 @@ Masuk ke folder backend dan jalankan server menggunakan `uv`.
 
 ```powershell
 cd backend
-uv run python main.py
+uv run python src/main.py
 ```
-*(Atau `uv run uvicorn main:app --reload` untuk development)*
+*(Atau `uv run uvicorn src.main:app --reload` untuk development)*
 
 ### 2. Jalankan frontend
 
