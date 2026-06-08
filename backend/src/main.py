@@ -131,44 +131,49 @@ async def process_pipeline(request: PipelineRequest):
     area_pixels = None
     area_percent = None
     
-    for step in request.steps:
-        module = step.module
-        config = step.config
-        
-        if module == 'windowing':
-            preset = config.get('preset', 'lung')
-            current_img = mp.apply_windowing(current_img, preset)
+    try:
+        for step in request.steps:
+            module = step.module
+            config = step.config
             
-        elif module == 'noise-removal':
-            method = config.get('method', 'gaussian')
-            if method == 'gaussian':
-                current_img = mp.apply_gaussian_blur(current_img, 5, 1.0)
-            elif method == 'median':
-                current_img = mp.apply_median_filter(current_img, 5)
+            if module == 'windowing':
+                preset = config.get('preset', 'lung')
+                current_img = mp.apply_windowing(current_img, preset)
                 
-        elif module == 'edge-detection':
-            method = config.get('method', 'sobel')
-            if method == 'sobel':
-                current_img = mp.apply_sobel(current_img)
-            elif method == 'canny':
-                current_img = mp.apply_canny(current_img, 50, 150)
+            elif module == 'noise-removal':
+                method = config.get('method', 'gaussian')
+                if method == 'gaussian':
+                    current_img = mp.apply_gaussian_blur(current_img, 5, 1.0)
+                elif method == 'median':
+                    current_img = mp.apply_median_filter(current_img, 5)
+                    
+            elif module == 'edge-detection':
+                method = config.get('method', 'sobel')
+                if method == 'sobel':
+                    current_img = mp.apply_sobel(current_img)
+                elif method == 'canny':
+                    current_img = mp.apply_canny(current_img, 50, 150)
+                    
+            elif module == 'segmentation':
+                min_thresh = config.get('min_thresh', 100)
+                max_thresh = config.get('max_thresh', 200)
+                current_img, pxl, pct = mp.apply_segmentation(current_img, min_thresh, max_thresh)
+                area_pixels = int(pxl)
+                area_percent = round(pct, 2)
                 
-        elif module == 'segmentation':
-            min_thresh = config.get('min_thresh', 100)
-            max_thresh = config.get('max_thresh', 200)
-            current_img, pxl, pct = mp.apply_segmentation(current_img, min_thresh, max_thresh)
-            area_pixels = int(pxl)
-            area_percent = round(pct, 2)
-            
-    response_data = {
-        "image": encode_image(current_img)
-    }
-    
-    if area_pixels is not None:
-        response_data["area_pixels"] = area_pixels
-        response_data["area_percent"] = area_percent
+        response_data = {
+            "image": encode_image(current_img)
+        }
         
-    return response_data
+        if area_pixels is not None:
+            response_data["area_pixels"] = area_pixels
+            response_data["area_percent"] = area_percent
+            
+        return response_data
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

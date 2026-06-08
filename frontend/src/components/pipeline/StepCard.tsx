@@ -39,11 +39,27 @@ const StepCard = ({ step, index, onUpdate, onRemove }: StepCardProps) => {
     return labels[module] || module.toUpperCase();
   };
 
+  const getStepSummary = (step: PipelineStep) => {
+    if (!step.enabled) return 'DISABLED';
+    switch (step.module) {
+      case 'windowing':
+        return `Preset: ${step.config.preset || 'lung'}`;
+      case 'noise-removal':
+        return `Method: ${step.config.method || 'gaussian'}`;
+      case 'edge-detection':
+        return `Algo: ${step.config.method || 'sobel'}`;
+      case 'segmentation':
+        return `Thresh: ${step.config.min_thresh || 100} - ${step.config.max_thresh || 200}`;
+      default:
+        return '';
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white border ${isDragging ? 'border-cyan-500 shadow-lg' : 'border-gray-300'} mb-3`}
+      className={`bg-white border ${isDragging ? 'border-cyan-500 shadow-lg z-10 relative' : 'border-gray-300'} mb-2`}
     >
       <div className="flex items-center p-3 border-b border-gray-100 bg-gray-50">
         <div 
@@ -58,8 +74,15 @@ const StepCard = ({ step, index, onUpdate, onRemove }: StepCardProps) => {
           {(index + 1).toString().padStart(2, '0')}
         </span>
         
-        <div className="flex-1 font-bold text-sm text-slate-800 uppercase tracking-wide">
-          {getModuleLabel(step.module)}
+        <div className="flex-1 flex items-center gap-3 overflow-hidden">
+          <span className="font-bold text-sm text-slate-800 uppercase tracking-wide whitespace-nowrap">
+            {getModuleLabel(step.module)}
+          </span>
+          {!isExpanded && (
+            <span className={`text-[10px] font-mono px-2 py-0.5 border truncate ${step.enabled ? 'text-cyan-700 bg-cyan-50 border-cyan-100' : 'text-gray-400 bg-gray-50 border-gray-200'}`}>
+              {getStepSummary(step)}
+            </span>
+          )}
         </div>
         
         <div className="flex items-center gap-2">

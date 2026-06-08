@@ -24,6 +24,9 @@ def manual_convolve2d(image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     I.S.: Citra 2D dan matriks kernel diberikan.
     F.S.: Mengembalikan hasil konvolusi 2D secara manual menggunakan manipulasi stride array NumPy (tanpa modul filter eksternal).
     """
+    if len(image.shape) == 3:
+        image = np.mean(image, axis=2).astype(np.float32)
+
     pad_h = kernel.shape[0] // 2
     pad_w = kernel.shape[1] // 2
     padded = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)), mode='edge').astype(np.float32)
@@ -55,6 +58,9 @@ def apply_median_filter(img: np.ndarray, kernel_size: int = 5) -> np.ndarray:
     I.S.: Citra grayscale (img) diberikan.
     F.S.: Mengembalikan citra hasil perhitungan filter Median (non-linear) dengan pendekatan windowing array.
     """
+    if len(img.shape) == 3:
+        img = np.mean(img, axis=2).astype(np.float32)
+        
     pad = kernel_size // 2
     padded = np.pad(img, pad, mode='edge')
     
@@ -141,6 +147,9 @@ def apply_segmentation(img: np.ndarray, min_thresh: int, max_thresh: int):
     I.S.: Citra grayscale dan rentang batas atas/bawah (threshold) diberikan.
     F.S.: Melakukan segmentasi (masking) ROI manual dan mengembalikan (citra_blended_BGR, pixel_area, persentase_area).
     """
+    if len(img.shape) == 3:
+        img = np.mean(img, axis=2).astype(np.float32)
+        
     # Thresholding logika dasar NumPy
     mask = np.zeros_like(img, dtype=np.uint8)
     mask[(img >= min_thresh) & (img <= max_thresh)] = 255
