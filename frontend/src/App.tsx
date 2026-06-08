@@ -4,10 +4,12 @@ import UploadCard from "./components/processing/UploadCard";
 import ProcessingModules from "./components/processing/ProcessingModules";
 import AnalysisReport from "./components/processing/AnalysisReport";
 import ImageViewer from "./components/viewer/ImageViewer";
+import PipelinePage from "./components/pipeline/PipelinePage";
 import { useImageProcessing } from "./hooks/useImageProcessing";
-import type { ProcessingTab } from "./types";
+import type { AppMode, ProcessingTab } from "./types";
 
 function App() {
+  const [appMode, setAppMode] = useState<AppMode>("per-module");
   const [activeTab, setActiveTab] = useState<ProcessingTab>("windowing");
 
   // Parameters
@@ -49,45 +51,54 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-slate-800 font-sans selection:bg-cyan-500/30">
-      <Header originalImage={originalImage} onReset={resetImage} />
+      <Header 
+        originalImage={originalImage} 
+        onReset={resetImage} 
+        appMode={appMode}
+        onModeChange={setAppMode}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Sidebar - Controls */}
-          <div className="lg:col-span-4 space-y-6">
-            <UploadCard onFileUpload={handleFileUpload} />
+        {appMode === "pipeline" ? (
+          <PipelinePage />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Sidebar - Controls */}
+            <div className="lg:col-span-4 space-y-6">
+              <UploadCard onFileUpload={handleFileUpload} />
 
-            <ProcessingModules
-              originalImage={originalImage}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              windowPreset={windowPreset}
-              setWindowPreset={setWindowPreset}
-              noiseMethod={noiseMethod}
-              setNoiseMethod={setNoiseMethod}
-              edgeMethod={edgeMethod}
-              setEdgeMethod={setEdgeMethod}
-              segMin={segMin}
-              setSegMin={setSegMin}
-              segMax={segMax}
-              setSegMax={setSegMax}
-              loading={loading}
-              onApply={handleApply}
-            />
+              <ProcessingModules
+                originalImage={originalImage}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                windowPreset={windowPreset}
+                setWindowPreset={setWindowPreset}
+                noiseMethod={noiseMethod}
+                setNoiseMethod={setNoiseMethod}
+                edgeMethod={edgeMethod}
+                setEdgeMethod={setEdgeMethod}
+                segMin={segMin}
+                setSegMin={setSegMin}
+                segMax={segMax}
+                setSegMax={setSegMax}
+                loading={loading}
+                onApply={handleApply}
+              />
 
-            <AnalysisReport roiData={roiData} />
+              <AnalysisReport roiData={roiData} />
+            </div>
+
+            {/* Right Area - Canvas View */}
+            <div className="lg:col-span-8 space-y-6">
+              <ImageViewer
+                originalImage={originalImage}
+                processedImage={processedImage}
+                activeTab={activeTab}
+                loading={loading}
+              />
+            </div>
           </div>
-
-          {/* Right Area - Canvas View */}
-          <div className="lg:col-span-8 space-y-6">
-            <ImageViewer
-              originalImage={originalImage}
-              processedImage={processedImage}
-              activeTab={activeTab}
-              loading={loading}
-            />
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

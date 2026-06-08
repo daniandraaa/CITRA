@@ -4,7 +4,7 @@ import type { ProcessingTab } from '../../types';
 interface ImageViewerProps {
   originalImage: string | null;
   processedImage: string | null;
-  activeTab: ProcessingTab;
+  activeTab: ProcessingTab | 'pipeline';
   loading: boolean;
 }
 
@@ -81,7 +81,6 @@ const ImageViewer = ({
             <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Resolution: 512 x 512 px</span>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Depth: 16-bit simulation</span>
           </div>
-          <span className="text-xs font-bold text-cyan-600 uppercase animate-pulse">Real-time pipeline active</span>
         </div>
       )}
     </div>
